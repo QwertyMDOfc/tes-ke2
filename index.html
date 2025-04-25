@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Key Validator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --success: #00b09b;
+            --success-dark: #008a76;
+            --error: #ff416c;
+            --white: #ffffff;
+            --black: #333333;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            position: relative;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transform-style: preserve-3d;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .container:hover::before {
+            left: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            font-size: 2rem;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .input-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .input-group input:focus {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: var(--white);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+            z-index: -1;
+            transition: opacity 0.3s;
+            opacity: 0;
+        }
+        
+        .btn:hover::after {
+            opacity: 1;
+        }
+        
+        .error-msg {
+            color: var(--error);
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            min-height: 20px;
+        }
+        
+        /* Success State */
+        .success-container {
+            text-align: center;
+            display: none;
+        }
+        
+        .success-icon {
+            font-size: 5rem;
+            color: var(--success);
+            margin-bottom: 1.5rem;
+            animation: bounce 1s infinite alternate;
+        }
+        
+        .success-message {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+        
+        .generate-btn {
+            background: linear-gradient(to right, var(--success), var(--success-dark));
+        }
+        
+        .generate-btn::after {
+            background: linear-gradient(to right, var(--success-dark), var(--success));
+        }
+        
+        /* Loading Animation */
+        .loading {
+            display: none;
+            margin: 2rem auto;
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--white);
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        .generated-key {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            display: none;
+            letter-spacing: 2px;
+        }
+        
+        /* Animations */
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-15px); }
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Transition effects */
+        .fade-in {
+            animation: fadeIn 0.5s forwards;
+        }
+        
+        /* Flip animation */
+        .flip-out {
+            animation: flipOut 0.5s forwards;
+        }
+        
+        .flip-in {
+            animation: flipIn 0.5s forwards;
+        }
+        
+        @keyframes flipOut {
+            to { transform: rotateY(90deg) scale(0.8); opacity: 0; }
+        }
+        
+        @keyframes flipIn {
+            from { transform: rotateY(90deg) scale(0.8); opacity: 0; }
+            to { transform: rotateY(0) scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="inputContainer">
+        <h1>Masukkan Key</h1>
+        <div class="input-group">
+            <input type="text" id="keyInput" placeholder="Masukkan key di sini">
+        </div>
+        <button class="btn" onclick="validateKey()">Validasi Key</button>
+        <p class="error-msg" id="errorMsg"></p>
+    </div>
+
+    <div class="container success-container" id="successContainer">
+        <div class="success-icon">✓</div>
+        <div class="success-message">KEY VALID!</div>
+        <button class="btn generate-btn" id="generateBtn" onclick="generateKey()">Generate Key (Tester Only)</button>
+        
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>Generating key...</p>
+        </div>
+        
+        <div class="generated-key" id="generatedKey"></div>
+    </div>
+
+    <script>
+        async function validateKey() {
+            const userInput = document.getElementById('keyInput').value.trim();
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.textContent = '';
+            
+            if (!userInput) {
+                errorMsg.textContent = 'Silakan masukkan key';
+                return;
+            }
+
+            try {
+                // Animasi flip out
+                const inputContainer = document.getElementById('inputContainer');
+                inputContainer.classList.add('flip-out');
+                
+                // Fetch key dari GitHub
+                const response = await fetch('https://raw.githubusercontent.com/QwertyMDOfc/gte/refs/heads/main/key');
+                
+                if (!response.ok) {
+                    throw new Error('Gagal mengambil key dari GitHub');
+                }
+                
+                const validKey = (await response.text()).trim();
+                
+                setTimeout(() => {
+                    if (userInput === validKey) {
+                        // Key valid
+                        inputContainer.style.display = 'none';
+                        const successContainer = document.getElementById('successContainer');
+                        successContainer.style.display = 'block';
+                        successContainer.classList.add('flip-in');
+                    } else {
+                        errorMsg.textContent = 'Key tidak valid';
+                        inputContainer.classList.remove('flip-out');
+                        inputContainer.classList.add('fade-in');
+                    }
+                }, 500);
+                
+            } catch (error) {
+                errorMsg.textContent = 'Terjadi kesalahan saat memvalidasi key';
+                console.error('Error:', error);
+                document.getElementById('inputContainer').classList.remove('flip-out');
+                document.getElementById('inputContainer').classList.add('fade-in');
+            }
+        }
+
+        function generateKey() {
+            const generateBtn = document.getElementById('generateBtn');
+            const loading = document.getElementById('loading');
+            const generatedKey = document.getElementById('generatedKey');
+            
+            // Sembunyikan tombol dan tampilkan loading
+            generateBtn.style.display = 'none';
+            loading.style.display = 'block';
+            generatedKey.style.display = 'none';
+            
+            // Proses generate key selama 3 detik
+            setTimeout(() => {
+                loading.style.display = 'none';
+                
+                // Generate 5 angka acak
+                const numbers = '0123456789';
+                let numPart = '';
+                for (let i = 0; i < 5; i++) {
+                    numPart += numbers.charAt(Math.floor(Math.random() * numbers.length));
+                }
+                
+                // Generate 5 huruf acak
+                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                let letterPart = '';
+                for (let i = 0; i < 5; i++) {
+                    letterPart += letters.charAt(Math.floor(Math.random() * letters.length));
+                }
+                
+                // Gabungkan dan acak lagi
+                const combined = numPart + letterPart;
+                const shuffled = combined.split('').sort(() => 0.5 - Math.random()).join('');
+                const finalKey = shuffled.match(/.{1,5}/g).join('-');
+                
+                // Tampilkan key yang dihasilkan
+                generatedKey.textContent = finalKey;
+                generatedKey.style.display = 'block';
+                generatedKey.classList.add('fade-in');
+                
+                // Tampilkan kembali tombol setelah 5 detik
+                setTimeout(() => {
+                    generateBtn.style.display = 'block';
+                }, 5000);
+            }, 3000);
+        }
+
+        // Tambahkan event listener untuk tombol Enter
+        document.getElementById('keyInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                validateKey();
+            }
+        });
+    </script>
+</body>
+  </html>
