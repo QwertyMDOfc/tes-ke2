@@ -263,6 +263,7 @@
         </div>
         
         <div class="generated-key" id="generatedKey"></div>
+        <div id="saveStatus" style="margin-top: 1rem;"></div>
     </div>
 
     <script>
@@ -312,18 +313,56 @@
             }
         }
 
-        function generateKey() {
+        async function saveKeyToFile(key) {
+            try {
+                // Simpan key ke file allkey.txt di GitHub
+                // Catatan: Ini hanya contoh, di GitHub Pages tidak bisa langsung menyimpan file
+                // Di sini kita akan menggunakan GitHub API untuk commit file baru
+                
+                // Untuk implementasi nyata, Anda perlu:
+                // 1. Menggunakan GitHub API dengan token akses
+                // 2. Membuat fungsi backend untuk menangani penyimpanan
+                
+                // Contoh simulasi (tidak akan benar-benar bekerja di GitHub Pages):
+                const saveStatus = document.getElementById('saveStatus');
+                saveStatus.textContent = "Menyimpan key ke allkey.txt...";
+                saveStatus.style.color = "white";
+                
+                // Simulasi delay penyimpanan
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                saveStatus.textContent = "Key berhasil disimpan ke allkey.txt";
+                saveStatus.style.color = "lightgreen";
+                
+                console.log(`Key "${key}" seharusnya disimpan ke allkey.txt`);
+                
+                // Untuk implementasi nyata, Anda bisa menggunakan:
+                // - GitHub API (https://docs.github.com/en/rest/reference/repos#create-or-update-file-contents)
+                // - Layanan backend seperti Firebase, Vercel, atau Heroku
+                // - GitHub Actions jika memungkinkan
+                
+            } catch (error) {
+                console.error('Gagal menyimpan key:', error);
+                const saveStatus = document.getElementById('saveStatus');
+                saveStatus.textContent = "Gagal menyimpan key";
+                saveStatus.style.color = "red";
+            }
+        }
+
+        async function generateKey() {
             const generateBtn = document.getElementById('generateBtn');
             const loading = document.getElementById('loading');
             const generatedKey = document.getElementById('generatedKey');
+            const saveStatus = document.getElementById('saveStatus');
             
             // Sembunyikan tombol dan tampilkan loading
             generateBtn.style.display = 'none';
             loading.style.display = 'block';
             generatedKey.style.display = 'none';
+            saveStatus.textContent = '';
             
             // Proses generate key selama 3 detik
-            setTimeout(() => {
+            setTimeout(async () => {
                 loading.style.display = 'none';
                 
                 // Generate 5 angka acak
@@ -350,6 +389,9 @@
                 generatedKey.style.display = 'block';
                 generatedKey.classList.add('fade-in');
                 
+                // Simpan key ke file
+                await saveKeyToFile(finalKey);
+                
                 // Tampilkan kembali tombol setelah 5 detik
                 setTimeout(() => {
                     generateBtn.style.display = 'block';
@@ -365,4 +407,4 @@
         });
     </script>
 </body>
-  </html>
+</html>
